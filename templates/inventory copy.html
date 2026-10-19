@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Emergency Relief Operations & Dispatch System</title>
+    </head>
+
+
+    <body class="bg-light">
+        <h2>Inventory</h2>
+        <a href="/add" class="btn btn-success mb-3">Add New Items</a>
+        <form method="GET" action="/" class="mb-3">
+            <div class="input-group">
+                <input type="text" name="search" placeholder="Search by name" value="{{ search_query }}" class="form-control">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+
+            <div class="input-group" ,class="mb-3">
+                <a href="/?sort=name" class="btn btn-outline-primary btn-sm me-2 mb-3">Sort By Name </a>
+                <a href="/?sort=quantity" class="btn btn-outline-primary btn-sm me-2 mb-3">Sort By Quantity  </a>
+                <a href="/?sort=price" class="btn btn-outline-primary btn-sm me-2 mb-3">Sort By Price  </a>
+            </div>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item[0]}}</td>
+                    <td>{{ item[1]}}</td>
+                    <td>{{ item[2]}}</td>
+                    <td>{{ item[3]}}</td>
+                    <td>
+                        <a href="/edit/{{ item[0] }}" class="btn btn-primary btn-sm">Edit</a>
+                        <a href="/delete/{{ item[0] }}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </body>
+</html>
