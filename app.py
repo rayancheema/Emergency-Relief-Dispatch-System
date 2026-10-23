@@ -85,6 +85,13 @@ def add_request():
         
     return render_template("add_request.html", shelters=shelters, error=error)
 
+# Function for allocation of supplies for requests:
+@app.route("/allocate", methods=["POST"])
+def allocate():
+    db.allocate_inventory()
+    return redirect(url_for("home"))
+
+
 # Routes for the export functions as CSV format
 
 @app.route("/export/csv")
@@ -94,7 +101,7 @@ def export_csv():
     si = io.StringIO()
     writer = csv.writer(si)
     # Header row
-    writer.writerow(["Request ID", "Shelter ID", "Item Required", "Quantity", "Urgency"])
+    writer.writerow(["Request ID","Shelter ID","Item Required","Requested Quantity","Allocated Quantity","Status","Urgency"])
     
     # Data rows
     for req in requests_data:
