@@ -21,7 +21,7 @@ def init_db():
         item TEXT NOT NULL,
         quantity INTEGER NOT NULL,
         allocated_quantity INTEGER NOT NULL DEFAULT 0,
-        TEXT NOT NULL DEFAULT 'Pending',
+        status TEXT NOT NULL DEFAULT 'Pending',
         urgency TEXT NOT NULL CHECK (
             urgency IN ('Critical', 'High', 'Moderate')
         ),
@@ -151,7 +151,8 @@ def get_sorted_requests():
             WHEN 'High' THEN 2
             WHEN 'Moderate' THEN 3
             ELSE 4
-        END
+        END,
+        request_id ASC
     ''')
 
     requests_list = cr.fetchall()
@@ -159,10 +160,88 @@ def get_sorted_requests():
 
     return requests_list
 
+# Making a function so that the inventory is automatically allocated.
+def allocate_inventory():
+    conn = sqlite3.connect(DB_Name)
+    cr = conn.cursor()
+
+    cr.execute("""
+        SELECT request_id, shelter_id, item, quantity,
+               allocated_quantity, urgency
+        FROM requests
+        ORDER BY CASE urgency
+            WHEN 'Critical' THEN 1
+            WHEN 'High' THEN 2
+            WHEN 'Moderate' THEN 3
+            ELSE 4
+        END,
+        request_id ASC
+    """)
+
+    requests_list = cr.fetchall()
+    for request in requests_list:
+        request_id, shelter_id, item, quantity, allocated_quantity, urgency = request
+        remaining = quantity - allocated_quantity
+
+        if remaining <= 0:
+            continue
+
+        cr.execute("""
+            SELECT warehouse_id, quantity
+            FROM inventory
+            WHERE LOWER(TRIM(item)) = LOWER(TRIM(?))
+              AND quantity > 0
+            ORDER BY warehouse_id
+        """, (item,))
+
+        warehouses = cr.fetchall()
+
+
+        for warehouse_id, stock in warehouses:
+            if remaining <= 0:
+                break
+
+            # Allocate only what the warehouse has available
+            allocated = min(remaining, stock)
+
+            # Deduct the allocated stock from the warehouse
+            cr.execute("""
+                UPDATE inventory
+                SET quantity = quantity - ?
+                WHERE warehouse_id = ?
+                  AND LOWER(TRIM(item)) = LOWER(TRIM(?))
+            """, (allocated, warehouse_id, item))
+
+            # Record the allocation in the history table
+            cr.execute("""
+                INSERT INTO allocation_logs
+                (request_id, shelter_id, warehouse_id, item,
+                 quantity_allocated, allocation_time)
+                VALUES (?, ?, ?, ?, ?, datetime('now'))
+            """, (request_id, shelter_id, warehouse_id, item, allocated))
+
+            # Update how much of the request has been fulfilled
+            allocated_quantity += allocated
+            remaining -= allocated
+
+        # Determine the request's new status
+        if allocated_quantity >= quantity:
+            status = "Fulfilled"
+        elif allocated_quantity > 0:
+            status = "Partially Fulfilled"
+        else:
+            status = "Pending"
+
+        cr.execute("""
+            UPDATE requests
+            SET allocated_quantity = ?, status = ?
+            WHERE request_id = ?
+        """, (allocated_quantity, status, request_id))
+    conn.commit()
+    conn.close()
 
 
 
 if __name__ == "__main__":
     init_db()
-    check_data()
-    print("Database and tables initialized successfully!")
+    print("Database initialized successfully!")
