@@ -240,6 +240,28 @@ def allocate_inventory():
     conn.commit()
     conn.close()
 
+# Code for allocation history
+
+def get_allocation_history():
+    conn = sqlite3.connect(DB_Name)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            allocation_logs.allocation_id,
+            allocation_logs.request_id,
+            allocation_logs.shelter_id,
+            allocation_logs.warehouse_id,
+            allocation_logs.item,
+            allocation_logs.quantity_allocated,
+            allocation_logs.allocation_time
+        FROM allocation_logs
+        ORDER BY allocation_logs.allocation_id DESC
+    """)
+
+    history = cursor.fetchall()
+    conn.close()
+    return history
 
 
 if __name__ == "__main__":

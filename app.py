@@ -91,6 +91,12 @@ def allocate():
     db.allocate_inventory()
     return redirect(url_for("home"))
 
+#Routes for the allocation history
+
+@app.route("/allocation_history")
+def allocation_history():
+    history = db.get_allocation_history()
+    return render_template("allocation_history.html", history=history)
 
 # Routes for the export functions as CSV format
 
