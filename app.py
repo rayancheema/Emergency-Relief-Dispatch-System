@@ -74,8 +74,8 @@ def add_request():
     if request.method == "POST":
         shelter_id = request.form["shelter_id"]
         item = request.form["item"]
-        qty = request.form["qty"]
-        urgency = request.form["urgency"]
+        qty = request.form["quantity"]
+        urgency = request.form.get("urgency", "Moderate")
         
         if not shelter_id or not item or not qty or int(qty) <= 0:
             error = "Please fill out all request fields correctly."

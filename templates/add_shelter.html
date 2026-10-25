@@ -1,40 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Register Shelter</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register New Shelter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.css">
+    <link rel="stylesheet" href="../static/style.css">
 </head>
-<body class="bg-light">
-    <div class="container my-5" style="max-width: 500px;">
-        <div class="card shadow p-4">
-            <h2 class="mb-3 text-secondary">Register New Shelter</h2>
 
-            <form method="POST">
-                <div class="mb-3">
-                    <label class="form-label">Shelter ID:</label>
-                    <input type="text" name="shelter_id" class="form-control" required placeholder="e.g., SH-101">
+<body>
+    <div class="bg-circle bg1"></div>
+    <div class="bg-circle bg2"></div>
+    <div class="bg-circle bg3"></div>
+
+    <div class="auth-wrapper">
+        <div class="auth-card" id="authCard">
+
+            <!-- Login Form -->
+            <div class="form-panel login-panel">
+                <div class="logo">
+                    <i class="fa-sharp fa-solid fa-pen-to-square"></i>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Shelter Name:</label>
-                    <input type="text" name="name" class="form-control" required placeholder="e.g., Community Center Shelter">
+                <h2 >Register New Shelter</h2>
+
+                {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                <form method="POST">
+                    <!-- Shelter ID -->
+                    <div class="input-group">
+                        <div class="electric-glow"></div>
+                        <div class="electric-border"></div>
+                        <input type="text" name="shelter_id" placeholder=" " required>
+                        <label for="shelter_id">Shelter ID</label>
+                    </div>
+
+                    <!-- Shelter Name -->
+                    <div class="input-group">
+                        <div class="electric-glow"></div>
+                        <div class="electric-border"></div>
+                        <input type="text" name="name" placeholder=" " required>
+                        <label for="name">Shelter Name</label>
+                    </div>
+
+                    
+                    <!-- Priority -->
+                    <div class="input-group">
+                        <div class="electric-glow"></div>
+                        <div class="electric-border"></div>
+                        <select id="priority" name="priority" required>
+                            <option value="" disabled selected hidden></option>
+                            <option value="Critical">Critical</option>
+                            <option value="High">High</option>
+                            <option value="Moderate">Moderate</option>
+                        </select>
+                        <label for="priority">Priority Level</label>
+                    </div>
+                    <!-- Coordinates -->
+                    <div class="input-group">
+                        <div class="electric-glow"></div>
+                        <div class="electric-border"></div>
+                        <input type="text" name="coordinates" placeholder=" " required>
+                        <label for="coordinates">Location Coordinates</label>
+                    </div>
+
+                    <button type="submit" class="main-btn">
+                        Register Shelter
+                    </button>
+                </form>
+                <div class="switch-area">
+                    <span>
+                        Return to Home Page
+                    </span>
+                    <a href="/"><button type="button" class="switch-circle"><i
+                                class="fa-solid fa-house"></i></button></a>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Priority Level:</label>
-                    <select name="priority" class="form-select" required>
-                        <option value="Critical">Critical</option>
-                        <option value="High">High</option>
-                        <option value="Moderate" selected>Moderate</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Location Coordinates:</label>
-                    <input type="text" name="coordinates" class="form-control" placeholder="e.g., 25.2048, 55.2708">
-                </div>
-                <button type="submit" class="btn btn-secondary w-100">Register Shelter</button>
-                <a href="/" class="btn btn-link w-100 mt-2">Back to Dashboard</a>
-            </form>
+            </div>
+
         </div>
     </div>
 </body>
+
 </html>

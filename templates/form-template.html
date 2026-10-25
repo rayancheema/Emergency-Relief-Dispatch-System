@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Emergency Request</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.css">
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+
+<body>
+    <div class="bg-circle bg1"></div>
+    <div class="bg-circle bg2"></div>
+    <div class="bg-circle bg3"></div>
+
+    <div class="auth-wrapper">
+        <div class="auth-card" id="authCard">
+
+            <!-- Login Form -->
+            <div class="form-panel login-panel">
+                <div class="logo">
+                    <i class="fa-sharp fa-solid fa-pen-to-square"></i>
+                </div>
+                <h2>Log Emergency Request</h2>
+
+                {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                <form method="POST">
+                    <!-- Select Shelter -->
+                    <div class="input-group">
+                        <div class="electric-glow"></div>
+                        <div class="electric-border"></div>
+                        <select id="shelter_id" name="shelter_id" required>
+                            <option value="" disabled selected hidden></option>
+                            {% for shelter in shelters %}
+                            <option value="{{ shelter[0] }}">{{ shelter[0] }} - {{ shelter[1] }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="shelter_id">Select Shelter</label>
+                    </div>
+
+                    <!-- Item Needed -->
+                    <div class="input-group">
+                        <div class="electric-glow"></div>
+                        <div class="electric-border"></div>
+                        <input type="text" name="item" placeholder=" " required>
+                        <label for="item">Item Needed</label>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="input-group">
+                        <div class="electric-glow"></div>
+                        <div class="electric-border"></div>
+                        <input type="number" name="quantity" min="1" placeholder=" " required>
+                        <label for="quantity">Quantity Required</label>
+                    </div>
+
+                    <!-- Urgency Level -->
+                    <div class="input-group">
+                        <div class="electric-glow"></div>
+                        <div class="electric-border"></div>
+                        <select id="urgency" name="Urgency Level" required>
+                            <option value="" disabled selected hidden></option>
+                            <option value="Critical">Critical</option>
+                            <option value="High">High</option>
+                            <option value="Moderate">Moderate</option>
+                        </select>
+                        <label for="urgency">Urgency Level</label>
+                    </div>
+
+                    <button type="submit" class="main-btn">
+                        Submit Request 
+                    </button>
+                </form>
+                <div class="switch-area">
+                    <span>
+                        Return to Home Page
+                    </span>
+                    <a href="/"><button type="button" class="switch-circle"><i
+                                class="fa-solid fa-house"></i></button></a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>
