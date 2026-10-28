@@ -3,6 +3,12 @@
 A Flask-based web application for managing emergency supplies, shelter
 requests, and priority-based distribution across warehouses.
 
+<div align="center">
+  <a href="https://vimeo.com/1240305559">
+    <img src="https://vumbnail.com/1240305559.jpg" alt="Phase 1 - Video" width="700">
+  </a>
+</div>
+
 ## Screenshots
 
 ### Main Dashboard
