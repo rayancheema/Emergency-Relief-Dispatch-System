@@ -29,30 +29,37 @@
                 {% endif %}
 
                 <form method="POST">
-                    <!-- Warehouse ID -->
+                    <!-- Warehouse ID with Dropdown Suggestions -->
                     <div class="input-group">
                         <div class="electric-glow"></div>
                         <div class="electric-border"></div>
-                        <input type="text" name="warehouse_id" placeholder=" " required>
-                        <label for="WareHouse_ID">Warehouse ID</label>
+                        <select name="warehouse_id" required>
+                            <option value="" disabled selected hidden></option>
+                            {% for wh in warehouses %}
+                            <option value="{{ wh }}">{{ wh }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="warehouse_id">Warehouse ID</label>
                     </div>
 
-                    <!-- Item -->
+                    <!-- Item Name with Dropdown Suggestions -->
                     <div class="input-group">
                         <div class="electric-glow"></div>
                         <div class="electric-border"></div>
-                        <input type="text" name="item" placeholder=" " required>
-                        <label for="ItemName">Item Name</label>
+                        <select name="item" required>
+                            <option value="" disabled selected hidden></option>
+                            {% for itm in items %}
+                            <option value="{{ itm }}">{{ itm }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="item">Item Name</label>
                     </div>
-
                     <!-- Quantity -->
                     <div class="input-group">
                         <div class="electric-glow"></div>
                         <div class="electric-border"></div>
                         <input type="number" name="quantity" placeholder=" " min="1" required>
-                        <label for="quantity">
-                            Quantity
-                        </label>
+                        <label for="quantity">Quantity</label>
                     </div>
 
                     <button type="submit" class="main-btn">
@@ -60,10 +67,9 @@
                     </button>
                 </form>
                 <div class="switch-area">
-                    <span>
-                        Return to Home Page
-                    </span>
-                    <a href="/"><button type="button" class="switch-circle"><i class="fa-solid fa-house"></i></button></a>
+                    <span>Return to Home Page</span>
+                    <a href="/"><button type="button" class="switch-circle"><i
+                                class="fa-solid fa-house"></i></button></a>
                 </div>
             </div>
 

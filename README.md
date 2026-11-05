@@ -54,6 +54,8 @@ Emergency-Relief-Dispatch-System/
     or Moderate urgency.
 -   **Priority-based allocation:** Allocate available stock to
     higher-urgency requests first.
+-   **Medic allocation:** Assign an available doctor from the nearest
+    hospital to a shelter using Euclidean distance.
 -   **Allocation history:** View recorded distributions, including the
     warehouse, shelter, item, quantity, and time.
 -   **Inventory search:** Filter inventory by item name.
@@ -100,6 +102,11 @@ python app.py
 Open **http://127.0.0.1:5000** in your browser.
 
 ## Notes
+
+Shelter and hospital coordinates for medic allocation should be entered
+as comma-separated `x,y` values. Call `db.allocate_medics(shelter_id)` to
+record an assignment; it returns the hospital ID, doctor ID, and distance,
+or `None` when no available doctor can be assigned.
 
 This project is an educational emergency-relief management system. It is
 not intended to replace professional emergency-response or dispatch

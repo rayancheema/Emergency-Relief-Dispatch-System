@@ -17,7 +17,7 @@
     <div class="auth-wrapper">
         <div class="auth-card" id="authCard">
 
-            <!-- Login Form -->
+            <!-- Request Form Panel -->
             <div class="form-panel login-panel">
                 <div class="logo">
                     <i class="fa-sharp fa-solid fa-pen-to-square"></i>
@@ -42,12 +42,17 @@
                         <label for="shelter_id">Select Shelter</label>
                     </div>
 
-                    <!-- Item Needed -->
+                    <!-- Item Needed with Datalist Dropdown -->
                     <div class="input-group">
                         <div class="electric-glow"></div>
                         <div class="electric-border"></div>
-                        <input type="text" name="item" placeholder=" " required>
+                        <input type="text" name="item" list="itemList" placeholder=" " required>
                         <label for="item">Item Needed</label>
+                        <datalist id="itemList">
+                            {% for itm in items %}
+                                <option value="{{ itm }}">
+                            {% endfor %}
+                        </datalist>
                     </div>
 
                     <!-- Quantity -->
@@ -62,7 +67,8 @@
                     <div class="input-group">
                         <div class="electric-glow"></div>
                         <div class="electric-border"></div>
-                        <select id="urgency" name="Urgency Level" required>
+                        <!-- Fixed name="Urgency Level" to name="urgency" to match app.py -->
+                        <select id="urgency" name="urgency" required>
                             <option value="" disabled selected hidden></option>
                             <option value="Critical">Critical</option>
                             <option value="High">High</option>

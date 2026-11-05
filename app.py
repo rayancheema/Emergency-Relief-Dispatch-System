@@ -35,19 +35,24 @@ def home():
 @app.route("/add_inventory", methods=["GET", "POST"])
 def add_inventory():
     error = ""
+    
+    # Fetch distinct warehouse IDs and items for dropdown/datalist suggestions
+    all_inventory = db.get_all_inventory()
+    warehouses = sorted(list(set(row[0] for row in all_inventory)))
+    items = sorted(list(set(row[1] for row in all_inventory)))
+
     if request.method == "POST":
         warehouse_id = request.form["warehouse_id"]
         item = request.form["item"]
         quantity = request.form["quantity"]
-        if not warehouse_id or not item or int(quantity) <0:
+        if not warehouse_id or not item or int(quantity) < 0:
             error = "Please enter valid warehouse stock values (quantity cannot be negative)."
         else: 
             quantity = int(quantity)
             db.add_inventory_item(warehouse_id, item, quantity)
             return redirect(url_for("home"))
-    return render_template("add_inventory.html",error = error)
-
-# Route to add a new shelter
+            
+    return render_template("add_inventory.html", error=error, warehouses=warehouses, items=items)# Route to add a new shelter
 
 @app.route("/add_shelter", methods=["GET", "POST"])
 def add_shelter():
@@ -65,11 +70,14 @@ def add_shelter():
 
                 
 # Route for a new request
-
 @app.route("/add_request", methods=["GET", "POST"])
 def add_request():
-    error= ""
+    error = ""
     shelters = db.get_all_shelters()
+    
+    # Fetch distinct item names so they appear as dropdown suggestions for requests
+    all_inventory = db.get_all_inventory()
+    items = sorted(list(set(row[1] for row in all_inventory)))
 
     if request.method == "POST":
         shelter_id = request.form["shelter_id"]
@@ -83,7 +91,8 @@ def add_request():
             db.add_request(shelter_id, item, int(qty), urgency)
             return redirect(url_for("home"))
         
-    return render_template("add_request.html", shelters=shelters, error=error)
+    return render_template("add_request.html", shelters=shelters, items=items, error=error)
+
 
 # Function for allocation of supplies for requests:
 @app.route("/allocate", methods=["POST"])
@@ -98,6 +107,60 @@ def allocation_history():
     history = db.get_allocation_history()
     return render_template("allocation_history.html", history=history)
 
+#ROutes for manager mode
+
+# --- MANAGER DASHBOARD ---
+@app.route("/manager")
+def manager_dashboard():
+    # Fetch master lists for strict dropdowns
+    master_items = db.get_all_master_items()
+    master_warehouses = db.get_all_master_warehouses()
+    
+    # Also fallback to existing inventory items if master tables are empty
+    existing_inventory = db.get_all_inventory()
+    shelters = db.get_all_shelters()
+
+    return render_template(
+        "manager.html",
+        items=master_items,
+        warehouses=master_warehouses,
+        inventory=existing_inventory,
+        shelters=shelters
+    )
+
+# --- ADD NEW MASTER ITEM ---
+@app.route("/manager/add_item", methods=["POST"])
+def manager_add_item():
+    item_name = request.form.get("item_name")
+    if item_name:
+        db.add_master_item(item_name)
+    return redirect(url_for("manager_dashboard"))
+
+# --- ADD NEW MASTER WAREHOUSE ---
+@app.route("/manager/add_warehouse", methods=["POST"])
+def manager_add_warehouse():
+    warehouse_id = request.form.get("warehouse_id")
+    location = request.form.get("location", "")
+    if warehouse_id:
+        db.add_master_warehouse(warehouse_id, location)
+    return redirect(url_for("manager_dashboard"))
+
+# --- EDIT INVENTORY STOCK DIRECTLY ---
+@app.route("/manager/edit_inventory", methods=["POST"])
+def manager_edit_inventory():
+    warehouse_id = request.form.get("warehouse_id")
+    item = request.form.get("item")
+    quantity_str = request.form.get("quantity")
+    
+    try:
+        quantity = int(float(quantity_str))
+    except (ValueError, TypeError):
+        quantity = 0
+
+    if warehouse_id and item and quantity >= 0:
+        db.update_inventory_stock(warehouse_id, item, quantity)
+        
+    return redirect(url_for("manager_dashboard"))    
 # Routes for the export functions as CSV format
 
 @app.route("/export/csv")
