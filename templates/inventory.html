@@ -13,19 +13,26 @@
         <h1 class="mb-4 text-danger fw-bold">🚨 Emergency Relief Operations & Dispatch System</h1>
 
         <!-- Action Navigation Buttons -->
-        <div class="mb-4">
-            <a href="/add_inventory" class="btn btn-primary me-2">📦 Add Warehouse Stock</a>
-            <a href="/add_shelter" class="btn btn-secondary me-2">⛺ Register Shelter</a>
-            <a href="/add_request" class="btn btn-warning me-2">📝 Log Urgent Request</a>
-            <a href="/export/csv" class="btn btn-success">📥 Export Requests (CSV)</a>
+        <div class="mb-4 d-flex flex-wrap gap-2">
+            <a href="/add_inventory" class="btn btn-primary">📦 Add Warehouse Stock</a>
+            <a href="/add_shelter" class="btn btn-secondary">⛺ Register Shelter</a>
+            <a href="/add_request" class="btn btn-warning">📝 Log Urgent Request</a>
+            
+            <!-- Phase 2 Medical Action Buttons -->
+            <a href="/add_hospital" class="btn btn-outline-danger">🏥 Register Hospital</a>
+            <a href="/add_doctor" class="btn btn-outline-primary">🩺 Add Doctor</a>
+            <a href="/add_medic_request" class="btn btn-outline-dark">🚑 Request Medic Support</a>
+
+            <a href="/export/csv" class="btn btn-success">📥 Export Full Report (CSV)</a>
+            
             <form action="{{ url_for('allocate') }}" method="POST" class="d-inline">
                 <button type="submit" class="btn btn-primary">🚚 Allocate Supplies</button>
             </form>
-            <a href="{{ url_for('allocation_history') }}" class="btn btn-info">
+            
+            <a href="{{ url_for('allocation_history') }}" class="btn btn-info text-white">
                 📋 Allocation History
             </a>
-            <a href="/manager" class="btn btn-secondary me-2">Manager</a>
-            
+            <a href="/manager" class="btn btn-secondary">Manager</a>
         </div>
 
         <hr>
@@ -46,8 +53,7 @@
 
         <!-- 1. Prioritized Requests Table -->
         <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-danger text-white fw-bold">Shelter Requests (Auto-Sorted by Urgency: Critical >
-                High > Moderate) </div>
+            <div class="card-header bg-danger text-white fw-bold">Shelter Requests (Auto-Sorted by Urgency: Critical > High > Moderate)</div>
             <div class="card-body">
                 <table class="table table-striped">
                     <thead>
@@ -64,25 +70,21 @@
                     <tbody>
                         {% for req in requests_list %}
                         <tr>
-
                             <td>{{ req[0] }}</td>
                             <td>{{ req[1] }}</td>
                             <td>{{ req[2] }}</td>
                             <td>{{ req[3] }}</td>
                             <td>{{ req[4] }}</td>
                             <td>
-                                <span
-                                    class="badge {% if req[5] == 'Fulfilled' %}bg-success{% elif req[5] == 'Partially Fulfilled' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                <span class="badge {% if req[5] == 'Fulfilled' %}bg-success{% elif req[5] == 'Partially Fulfilled' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                                     {{ req[5] }}
                                 </span>
                             </td>
                             <td>
-                                <span
-                                    class="badge {% if req[6] == 'Critical' %}bg-danger{% elif req[6] == 'High' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
+                                <span class="badge {% if req[6] == 'Critical' %}bg-danger{% elif req[6] == 'High' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
                                     {{ req[6] }}
                                 </span>
                             </td>
-
                         </tr>
                         {% else %}
                         <tr>
@@ -146,8 +148,7 @@
                                     <td>{{ shelter[0] }}</td>
                                     <td>{{ shelter[1] }}</td>
                                     <td>
-                                        <span
-                                            class="badge {% if shelter[2] == 'Critical' %}bg-danger{% elif shelter[2] == 'High' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                        <span class="badge {% if shelter[2] == 'Critical' %}bg-danger{% elif shelter[2] == 'High' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                                             {{ shelter[2] }}
                                         </span>
                                     </td>
@@ -156,6 +157,77 @@
                                 {% else %}
                                 <tr>
                                     <td colspan="4" class="text-center">No shelters registered.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PHASE 2: MEDICAL SECTION ================= -->
+        <div class="row mt-4">
+            <!-- 4. Hospitals Table -->
+            <div class="col-md-6">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-dark text-white fw-bold">Registered Hospitals</div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Hospital ID</th>
+                                    <th>Name</th>
+                                    <th>Coordinates</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for h in hospitals %}
+                                <tr>
+                                    <td>{{ h[0] }}</td>
+                                    <td>{{ h[1] }}</td>
+                                    <td>{{ h[2] }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No hospitals registered.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Doctors Directory Table -->
+            <div class="col-md-6">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-success text-white fw-bold">Doctors Directory & Status</div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Doctor ID</th>
+                                    <th>Hospital ID</th>
+                                    <th>Speciality</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for d in doctors %}
+                                <tr>
+                                    <td>{{ d[0] }}</td>
+                                    <td>{{ d[1] }}</td>
+                                    <td>{{ d[2] }}</td>
+                                    <td>
+                                        <span class="badge {% if d[3] == 'Available' %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ d[3] }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No doctors added.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

@@ -64,7 +64,7 @@ def init_db():
         )
     ''')
     
-    # Table 6: Doctors (Added hospital_id to properly link doctors to hospitals)
+    # Table 6: Doctors
     cur.execute(''' 
         CREATE TABLE IF NOT EXISTS doctors(
             doctor_id TEXT PRIMARY KEY,
@@ -74,19 +74,21 @@ def init_db():
         )
     ''')
     
-    # Table 7: Medic Requests
+    # Table 7: Medic Requests (Added speciality column for matching patient needs)
     cur.execute(''' 
         CREATE TABLE IF NOT EXISTS medic_requests(
             request_id INTEGER PRIMARY KEY AUTOINCREMENT,
             shelter_id TEXT,
             hospital_id TEXT,
             doctor_id TEXT,
+            speciality TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'Pending',
             FOREIGN KEY (shelter_id) REFERENCES shelters (shelter_id),
             FOREIGN KEY (hospital_id) REFERENCES hospitals (hospital_id),
             FOREIGN KEY (doctor_id) REFERENCES doctors (doctor_id)
         )
     ''')
+    
     # Master Items table
     cur.execute('''
         CREATE TABLE IF NOT EXISTS master_items (
@@ -278,7 +280,6 @@ def get_all_hospitals():
 def add_doctor(doctor_id, speciality, availability_status, hospital_id):
     conn = sqlite3.connect(DB_Name)
     cr = conn.cursor()
-    # Correctly insert hospital_id into the doctors table
     cr.execute("""
         INSERT OR REPLACE INTO doctors (doctor_id, hospital_id, speciality, availability_status) 
         VALUES (?, ?, ?, ?)
@@ -317,14 +318,18 @@ def _parse_coordinates(coordinates):
 #              Functions for the allocation of medic support 
 #=============================================================
 
-def add_medic_request(shelter_id, hospital_id, doctor_id):
+def add_medic_request(shelter_id, hospital_id, doctor_id, speciality):
    conn = sqlite3.connect(DB_Name)
    cr = conn.cursor()
-   cr.execute("INSERT INTO medic_requests (shelter_id, hospital_id, doctor_id) VALUES (?, ?, ?)", (shelter_id, hospital_id, doctor_id))
+   cr.execute("INSERT INTO medic_requests (shelter_id, hospital_id, doctor_id, speciality, status) VALUES (?, ?, ?, ?, 'Pending')", (shelter_id, hospital_id, doctor_id, speciality))
    conn.commit()
    conn.close()
 
-def allocate_medics(shelter_id):
+def allocate_medics(shelter_id, speciality):
+   """
+   Finds the nearest available doctor matching the requested specialty 
+   relative to the shelter's coordinates, allocates them, and updates their status.
+   """
    conn = sqlite3.connect(DB_Name)
    try:
        with conn:
@@ -340,22 +345,16 @@ def allocate_medics(shelter_id):
                raise ValueError(f"Shelter not found: {shelter_id}")
            shelter_x, shelter_y = _parse_coordinates(shelter[0])
 
-           # Query hospitals and join with available doctors directly via foreign key
-           cr.execute("""
-               h.hospital_id, h.location_coordinates, d.doctor_id
-               FROM hospitals h
-               JOIN doctors d ON h.hospital_id = d.hospital_id
-               WHERE h.location_coordinates IS NOT NULL
-                 AND d.availability_status = 'Available'
-           """)
-           # Note: The query above can be simplified to select available doctors grouped by hospital
+           # Query available doctors matching the requested specialty
            cr.execute("""
                SELECT h.hospital_id, h.location_coordinates, d.doctor_id
                FROM hospitals h
                JOIN doctors d ON h.hospital_id = d.hospital_id
                WHERE h.location_coordinates IS NOT NULL
                  AND d.availability_status = 'Available'
-           """)
+                 AND LOWER(TRIM(d.speciality)) = LOWER(TRIM(?))
+           """, (speciality,))
+           
            available_rows = cr.fetchall()
 
            candidates = []
@@ -368,16 +367,16 @@ def allocate_medics(shelter_id):
                candidates.append((distance, hospital_id, doctor_id))
 
            if not candidates:
-               return None
+               return None  # No available doctors found matching that specialty
 
            # Sort candidates by distance to find the nearest available doctor
            candidates.sort(key=lambda x: x[0])
            distance, hospital_id, doctor_id = candidates[0]
 
            cr.execute("""
-               INSERT INTO medic_requests (shelter_id, hospital_id, doctor_id, status)
-               VALUES (?, ?, ?, 'Allocated')
-           """, (shelter_id, hospital_id, doctor_id))
+               INSERT INTO medic_requests (shelter_id, hospital_id, doctor_id, speciality, status)
+               VALUES (?, ?, ?, ?, 'Allocated')
+           """, (shelter_id, hospital_id, doctor_id, speciality))
            
            cr.execute("""
                UPDATE doctors
@@ -388,7 +387,18 @@ def allocate_medics(shelter_id):
            return hospital_id, doctor_id, distance
    finally:
        conn.close()
-
+       
+def get_all_medic_requests():
+    conn = sqlite3.connect(DB_Name)
+    cr = conn.cursor()
+    cr.execute("""
+        SELECT request_id, shelter_id, hospital_id, doctor_id, speciality, status 
+        FROM medic_requests
+    """)
+    data = cr.fetchall()
+    
+    conn.close()
+    return data
 def get_allocation_history():
     conn = sqlite3.connect(DB_Name)
     cursor = conn.cursor()
